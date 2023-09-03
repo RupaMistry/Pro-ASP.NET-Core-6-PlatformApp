@@ -1,12 +1,25 @@
 using Platform;
+using Microsoft.AspNetCore.HttpLogging;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// AddHttpLogging() selects the fields and headers that are included in the logging message
+builder.Services.AddHttpLogging(opts =>
+{
+    opts.LoggingFields =
+      HttpLoggingFields.RequestMethod |
+      HttpLoggingFields.RequestPath |
+      HttpLoggingFields.ResponseStatusCode;
+});
+
 var app = builder.Build();
 
-var myNewLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("RupaPipeLine");
+// This middleware is used to generate log messages that describe the HTTP requests received by an application and the responses it produces.
+app.UseHttpLogging();
 
-myNewLogger.LogDebug($"Pipleine configuration started");
+//var myNewLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("RupaPipeLine");
+
+//myNewLogger.LogDebug($"Pipleine configuration started");
 
 app.MapGet("population/{city?}", Population.Endpoint);
 
@@ -27,7 +40,7 @@ app.MapGet("/", async (HttpContext context, IConfiguration configuration, IWebHo
 });
 
 
-myNewLogger.LogDebug($"Pipleine configuration ended");
+//myNewLogger.LogDebug($"Pipleine configuration ended");
 
 app.Run();
 
