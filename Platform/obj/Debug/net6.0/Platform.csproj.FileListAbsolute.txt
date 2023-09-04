@@ -25,3 +25,4 @@ C:\Projects Resume\1. Job\Chap15\Platform\obj\Debug\net6.0\refint\Platform.dll
 C:\Projects Resume\1. Job\Chap15\Platform\obj\Debug\net6.0\Platform.pdb
 C:\Projects Resume\1. Job\Chap15\Platform\obj\Debug\net6.0\Platform.genruntimeconfig.cache
 C:\Projects Resume\1. Job\Chap15\Platform\obj\Debug\net6.0\ref\Platform.dll
+C:\Projects Resume\1. Job\Chap15\Platform\bin\Debug\net6.0\libman.json
