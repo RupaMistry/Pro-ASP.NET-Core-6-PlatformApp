@@ -1,5 +1,6 @@
 using Platform;
 using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,16 @@ var app = builder.Build();
 
 // This middleware is used to generate log messages that describe the HTTP requests received by an application and the responses it produces.
 app.UseHttpLogging();
+
+// This middleware component is used to handle requests for static content 
+var env = app.Environment;
+app.UseStaticFiles(new StaticFileOptions()
+{
+    //FileProvider property is used to select a different location for static content
+    FileProvider = new PhysicalFileProvider($"{env.ContentRootPath}/staticfiles"),
+    //RequestPath property is used to specify a URL prefix that denotes requests for static context.
+    RequestPath = "/files"
+});
 
 //var myNewLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("RupaPipeLine");
 
@@ -38,7 +49,6 @@ app.MapGet("/", async (HttpContext context, IConfiguration configuration, IWebHo
 
     await context.Response.WriteAsync($"\nnThe secret ID is: {userSecretKey}\nThe secret key is: {userSecretValue}");
 });
-
 
 //myNewLogger.LogDebug($"Pipleine configuration ended");
 
