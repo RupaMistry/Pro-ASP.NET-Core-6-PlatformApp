@@ -52,5 +52,29 @@ app.MapGet("/", async (HttpContext context, IConfiguration configuration, IWebHo
 
 //myNewLogger.LogDebug($"Pipleine configuration ended");
 
+
+app.MapGet("/cookie", async context =>
+{
+    //Cookies are accessed through the HttpRequest.Cookies property, where the name of the cookie is used as the key
+    int counter1 = int.Parse(context.Request.Cookies["counter1"] ?? "0") + 1;
+
+    //Cookies are set through the HttpResponse.Cookies property, and the Append method creates or replaces a cookie in the response
+    context.Response.Cookies.Append("counter1", counter1.ToString(), new CookieOptions { MaxAge = TimeSpan.FromMinutes(30) });
+
+    int counter2 = int.Parse(context.Request.Cookies["counter2"] ?? "0") + 1;
+    context.Response.Cookies.Append("counter2", counter2.ToString(), new CookieOptions { MaxAge = TimeSpan.FromMinutes(30) });
+
+    await context.Response.WriteAsync($"Counter1: {counter1}, Counter2: {counter2}");
+});
+
+//This middleware deletes the cookies when the /clear URL is requested
+app.MapGet("clear", context =>
+{
+    context.Response.Cookies.Delete("counter1");
+    context.Response.Cookies.Delete("counter2");
+    context.Response.Redirect("/");
+    return Task.CompletedTask;
+});
+
 app.Run();
 
