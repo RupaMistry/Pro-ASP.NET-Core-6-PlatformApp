@@ -4,6 +4,12 @@ using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// The options pattern is used to configure a CookiePolicyOptions object, which sets the overall policy for cookies in the application
+builder.Services.Configure<CookiePolicyOptions>(opts =>
+{
+    opts.CheckConsentNeeded = context => true;
+});
+
 // AddHttpLogging() selects the fields and headers that are included in the logging message
 builder.Services.AddHttpLogging(opts =>
 {
@@ -14,6 +20,11 @@ builder.Services.AddHttpLogging(opts =>
 });
 
 var app = builder.Build();
+
+// This middleware will enforce the cookie policy and is added to the request pipeline.
+app.UseCookiePolicy();
+
+app.UseMiddleware<Platform.ConsentMiddleware>();
 
 // This middleware is used to generate log messages that describe the HTTP requests received by an application and the responses it produces.
 app.UseHttpLogging();
@@ -59,7 +70,11 @@ app.MapGet("/cookie", async context =>
     int counter1 = int.Parse(context.Request.Cookies["counter1"] ?? "0") + 1;
 
     //Cookies are set through the HttpResponse.Cookies property, and the Append method creates or replaces a cookie in the response
-    context.Response.Cookies.Append("counter1", counter1.ToString(), new CookieOptions { MaxAge = TimeSpan.FromMinutes(30) });
+    context.Response.Cookies.Append("counter1", counter1.ToString(), new CookieOptions
+    {
+        MaxAge = TimeSpan.FromMinutes(30),
+        IsEssential = true
+    });
 
     int counter2 = int.Parse(context.Request.Cookies["counter2"] ?? "0") + 1;
     context.Response.Cookies.Append("counter2", counter2.ToString(), new CookieOptions { MaxAge = TimeSpan.FromMinutes(30) });
