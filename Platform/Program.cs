@@ -11,6 +11,12 @@ builder.Services.AddHttpsRedirection(opts =>
     opts.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
 });
 
+// Enabling HSTS(HTTP Strict Transport Security)
+builder.Services.AddHsts(opts =>
+{
+    opts.MaxAge = TimeSpan.FromDays(1);
+    opts.IncludeSubDomains = true;
+});
 
 // The options pattern is used to configure a CookiePolicyOptions object, which sets the overall policy for cookies in the application
 builder.Services.Configure<CookiePolicyOptions>(opts =>
@@ -39,6 +45,12 @@ builder.Services.AddSession(opts =>
 
 
 var app = builder.Build();
+
+// HSTS is disabled during development and enabled only in production
+if (app.Environment.IsProduction())
+{
+    app.UseHsts();
+}
 
 // This middleware will enforce the cookie policy and is added to the request pipeline.
 app.UseCookiePolicy();
