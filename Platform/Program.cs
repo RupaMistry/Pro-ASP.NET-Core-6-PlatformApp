@@ -19,6 +19,15 @@ builder.Services.AddHttpLogging(opts =>
       HttpLoggingFields.ResponseStatusCode;
 });
 
+// Configuring the Session Service and Middleware
+
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(opts=>{
+opts.IdleTimeout=TimeSpan.FromMinutes(30);
+opts.Cookie.IsEssential = true;
+});
+
 var app = builder.Build();
 
 // This middleware will enforce the cookie policy and is added to the request pipeline.
@@ -90,6 +99,8 @@ app.MapGet("clear", context =>
     context.Response.Redirect("/");
     return Task.CompletedTask;
 });
+
+app.UseSession();
 
 app.Run();
 
