@@ -4,6 +4,14 @@ using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Setting the status code used in the redirection response and the port to which the client is redirected.
+builder.Services.AddHttpsRedirection(opts =>
+{
+    opts.HttpsPort = 5500;
+    opts.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+});
+
+
 // The options pattern is used to configure a CookiePolicyOptions object, which sets the overall policy for cookies in the application
 builder.Services.Configure<CookiePolicyOptions>(opts =>
 {
@@ -23,10 +31,12 @@ builder.Services.AddHttpLogging(opts =>
 
 builder.Services.AddDistributedMemoryCache();
 
-builder.Services.AddSession(opts=>{
-opts.IdleTimeout=TimeSpan.FromMinutes(30);
-opts.Cookie.IsEssential = true;
+builder.Services.AddSession(opts =>
+{
+    opts.IdleTimeout = TimeSpan.FromMinutes(30);
+    opts.Cookie.IsEssential = true;
 });
+
 
 var app = builder.Build();
 
@@ -99,6 +109,9 @@ app.MapGet("clear", context =>
     context.Response.Redirect("/");
     return Task.CompletedTask;
 });
+
+// Enforce all the client requests to use https by redirection, if accessed over http.
+app.UseHttpsRedirection();
 
 app.UseSession();
 
