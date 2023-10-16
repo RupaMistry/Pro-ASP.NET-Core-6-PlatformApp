@@ -1,8 +1,16 @@
 using Platform;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.HostFiltering;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Filtering Requests Using the Host Header
+builder.Services.Configure<HostFilteringOptions>(opts =>
+{
+    opts.AllowedHosts.Clear();
+    opts.AllowedHosts.Add("*.example.com");
+});
 
 // Setting the status code used in the redirection response and the port to which the client is redirected.
 builder.Services.AddHttpsRedirection(opts =>
@@ -45,6 +53,32 @@ builder.Services.AddSession(opts =>
 
 
 var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/error.html");
+    app.UseStaticFiles();
+}
+
+app.UseStatusCodePages("text/html", Responses.DefaultResponse);
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path == "/error")
+    {
+        context.Response.StatusCode = StatusCodes.Status404NotFound;
+        await Task.CompletedTask;
+    }
+    else
+    {
+        await next();
+    }
+});
+
+app.Run(context =>
+{
+    throw new Exception("Something has gone wrong");
+});
+
 
 // HSTS is disabled during development and enabled only in production
 if (app.Environment.IsProduction())
